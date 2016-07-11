@@ -1,13 +1,9 @@
----
-title: "Reproducible Research - Project 1"
-author: "Johanna Baker"
-date: "June 27, 2016"
-output: 
-  html_document: 
-    keep_md: yes
----
+# Reproducible Research - Project 1
+Johanna Baker  
+June 27, 2016  
 
-```{r prep, message=FALSE, warning=FALSE}
+
+```r
 options(scipen = 6)
 library(dplyr)
 library(ggplot2)
@@ -16,28 +12,34 @@ library(ggplot2)
 
 #### 1. Load the data:
 
-```{r loadData}
+
+```r
 activity <- read.csv("activity.csv")
 ```
 
 
 #### 2. Total number of steps taken per day
 
-```{r stepsperday}
+
+```r
 dailySteps <- summarise(group_by(activity, date), total = sum(steps))
 hist(dailySteps$total, main="Histogram of Total Steps per Day", xlab = "Total Steps")
-meanSteps <- round(mean(dailySteps$total, na.rm=TRUE), 2)
-medianSteps <- median(dailySteps$total, na.rm = TRUE)
-
 ```
 
-Mean daily steps: `r meanSteps`  
-Median daily steps: `r medianSteps`
+![](PA1_template_files/figure-html/stepsperday-1.png)<!-- -->
+
+```r
+meanSteps <- round(mean(dailySteps$total, na.rm=TRUE), 2)
+medianSteps <- median(dailySteps$total, na.rm = TRUE)
+```
+
+Mean daily steps: 10766.19  
+Median daily steps: 10765
 
 #### 3. Average daily activity pattern
 
-```{r dailypattern}
 
+```r
 intervalSteps <- activity %>%
   group_by(interval) %>%
   summarise(average = mean(steps, na.rm = TRUE))
@@ -45,25 +47,31 @@ intervalSteps <- activity %>%
 ggplot(intervalSteps, aes(x=interval, y=average)) + geom_point(alpha=.2, size=2) + geom_line() +
   labs(title="Average Steps per 5 Minute Interval", x="Time", y="Average Steps") +
   scale_x_continuous(labels=function(x) sprintf("%04d",x))
+```
 
+![](PA1_template_files/figure-html/dailypattern-1.png)<!-- -->
+
+```r
 maxSteps <- intervalSteps$interval[intervalSteps$average == max(intervalSteps$average)]
 maxSteps <- format(strptime(sprintf("%04d",maxSteps),"%H%M"), "%H:%M")
 ```
 
-The interval with the most steps starts at: `r maxSteps`
+The interval with the most steps starts at: 08:35
 
 
 #### 4. Imputing missing values
 
-```{r imputing1}
+
+```r
 missing <- table(is.na(activity$steps))
 ```
 
-Total missing values: `r missing[2]`
+Total missing values: 2304
 
 Missing values will be imputed using the average steps for that interval across the data set.
 
-```{r imputing2}
+
+```r
 #impute missing values by using the mean value for that interval across all dates
 
 intervalSteps <- activity %>%
@@ -80,26 +88,29 @@ activity_imputed$steps[nasteps] <- activity_imputed$average[nasteps]
 #Make a histogram of the total number of steps taken each day 
 dailySteps <- summarise(group_by(activity_imputed, date), total = sum(steps))
 hist(dailySteps$total, main="Histogram of Daily Steps (Using Imputed Values)", xlab = "Total Steps")
+```
 
+![](PA1_template_files/figure-html/imputing2-1.png)<!-- -->
+
+```r
 #Calculate and report the mean and median total number of steps taken per day
 #Do these values differ from the estimates from the first part of the assignment? 
 #What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 meanSteps_imputed <- round(mean(dailySteps$total, na.rm=TRUE), 2)
 medianSteps_imputed <- round(median(dailySteps$total, na.rm = TRUE), 2)
-
 ```
 
-Mean daily steps: `r meanSteps_imputed`  
-Median daily steps: `r medianSteps_imputed`
+Mean daily steps: 10766.19  
+Median daily steps: 10766.19
 
 There is minimal impact of imputing missing data on the estimates of the total daily number of steps using this method. Mean daily steps is the same with missing values removed or imputed. The median daily steps is nearly the same.
 
 
 #### 5. Differences in activity patterns between weekdays and weekends
 
-```{r weekdays}
 
+```r
 # Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating 
 # whether a given date is a weekday or weekend day.
 weekday <- c("Mon","Tue","Wed","Thu","Fri")
@@ -121,8 +132,7 @@ ggplot(intervalSteps_bydayType, aes(x=interval, y=average, facet=dayType)) +
   geom_line() + facet_grid(dayType~.) +
   labs(title="Average Steps on Weekdays vs Weekends", x="Time", y="Average Steps") +
   scale_x_continuous(labels=function(x) sprintf("%04d",x))
-
-
-
 ```
+
+![](PA1_template_files/figure-html/weekdays-1.png)<!-- -->
 
