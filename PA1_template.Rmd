@@ -42,7 +42,7 @@ intervalSteps <- activity %>%
   group_by(interval) %>%
   summarise(average = mean(steps, na.rm = TRUE))
 
-ggplot(intervalSteps, aes(x=interval, y=average)) + geom_point(alpha=.2, size=2) + geom_line() +
+ggplot(intervalSteps, aes(x=interval, y=average)) + geom_line() +
   labs(title="Average Steps per 5 Minute Interval", x="Time", y="Average Steps") +
   scale_x_continuous(labels=function(x) sprintf("%04d",x))
 
@@ -117,7 +117,6 @@ intervalSteps_bydayType <- activity_imputed %>%
   summarise(average = mean(steps))
 
 ggplot(intervalSteps_bydayType, aes(x=interval, y=average, facet=dayType)) + 
-  geom_point(alpha=.2, size=2) +
   geom_line() + facet_grid(dayType~.) +
   labs(title="Average Steps on Weekdays vs Weekends", x="Time", y="Average Steps") +
   scale_x_continuous(labels=function(x) sprintf("%04d",x))
